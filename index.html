@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora Pedagógica</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(270deg, #0f2027, #203a43, #2c5364);
+      background-size: 400% 400%;
+      animation: gradient 10s ease infinite;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .app {
+      width: 360px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      color: #ffffff;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #00e5ff;
+    }
+
+    .clock {
+      background: linear-gradient(145deg, #000000, #1a1a1a);
+      text-align: center;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 28px;
+      letter-spacing: 3px;
+      margin-bottom: 18px;
+      color: #00ffcc;
+      box-shadow: inset 0 0 12px rgba(0,255,204,0.4), 0 0 20px rgba(0,255,204,0.25);
+      font-weight: 600;
+    }
+
+    .inputs {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .inputs div {
+      flex: 1;
+    }
+
+    label {
+      font-size: 14px;
+      color: #bbb;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      width: 100%;
+      margin-top: 6px;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      background: #000;
+      color: #00ffcc;
+      font-size: 22px;
+      text-align: center;
+      box-shadow: inset 0 0 10px rgba(0,255,204,0.35);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 16px;
+      background: #00c853;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .result {
+      margin-top: 18px;
+      background: #000;
+      padding: 24px;
+      border-radius: 18px;
+      text-align: center;
+      font-size: 36px;
+      font-weight: 700;
+      color: #ffeb3b;
+      box-shadow: inset 0 0 14px rgba(255,235,59,0.45), 0 0 18px rgba(255,235,59,0.25);
+      letter-spacing: 1px;
+    }
+
+    .info {
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div style="text-align:center; margin-bottom:6px; font-family: 'Georgia', 'Times New Roman', serif; font-size:22px; letter-spacing:1.2px; font-weight:600; color:#e0f7fa;"><span style="color:#263238;"><span style="color:#ffffff;">EM Dr. Milton Leite Oliveira</span></div>
+    <div class="title">⏱️ Calculadora Horas Professor</div>
+
+    <div class="clock" id="clock">00:00:00</div>
+
+    <div class="inputs" style="font-weight:700;">
+      <div>
+        <label>Hora Inicial</label>
+        <input type="time" id="start" />
+      </div>
+      <div>
+        <label>Hora Final</label>
+        <input type="time" id="end" />
+      </div>
+    </div>
+
+    <button onclick="calculateHours()">Calcular Horas</button>
+
+    <div class="result" id="result">0h</div>
+
+    <div class="info">A cada 25 minutos é considerado meia hora</div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+
+      document.getElementById('clock').innerHTML = `${h}<span style="opacity:.6">:</span>${m}<span style="opacity:.6">:</span>${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function calculateHours() {
+      const start = document.getElementById('start').value;
+      const end = document.getElementById('end').value;
+      const result = document.getElementById('result');
+
+      if (!start || !end) {
+        result.innerText = 'Informe os horários';
+        return;
+      }
+
+      const [sh, sm] = start.split(':').map(Number);
+      const [eh, em] = end.split(':').map(Number);
+
+      let startMinutes = sh * 60 + sm;
+      let endMinutes = eh * 60 + em;
+
+      if (endMinutes < startMinutes) {
+        endMinutes += 24 * 60;
+      }
+
+      const diffMinutes = endMinutes - startMinutes;
+
+      const blocks = Math.floor(diffMinutes / 25);
+      const totalHours = blocks * 0.5;
+
+      result.innerText = totalHours.toFixed(1) + 'h';
+    }
+  </script>
+  <script>
+    // Registro do Service Worker (PWA)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
